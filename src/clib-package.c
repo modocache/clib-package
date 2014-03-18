@@ -19,6 +19,7 @@
 #include "fs/fs.h"
 #include "path-join/path-join.h"
 #include "parse-repo/parse-repo.h"
+#include "color/color.h"
 
 #include "clib-package.h"
 
@@ -122,8 +123,12 @@ clib_package_file_url(const char *url, const char *file) {
  */
 
 static inline void
-clib_package_debug(const char *type, const char *msg, int color) {
-  printf("  \033[%dm%10s\033[0m : \033[90m%s\033[m\n", color, type, msg);
+clib_package_debug(const char *type, const char *msg, int ansi_color) {
+  char *colored = color((ansi_color_opts){.color=ansi_color}, type);
+  char *gray = color((ansi_color_opts){.color=ANSI_COLOR_GRAY}, msg);
+  printf("  %s : %s\n", colored, gray);
+  free(colored);
+  free(gray);
 }
 
 static inline void
@@ -133,7 +138,7 @@ clib_package_log(const char *type, const char *msg, ...) {
   va_start(args, msg);
   vsprintf(buf, msg, args);
   va_end(args);
-  clib_package_debug(type, msg, 36);
+  clib_package_debug(type, msg, ANSI_COLOR_CYAN);
   free(buf);
 }
 
@@ -144,7 +149,7 @@ clib_package_error(const char *type, const char *msg, ...) {
   va_start(args, msg);
   vsprintf(buf, msg, args);
   va_end(args);
-  clib_package_debug(type, buf, 31);
+  clib_package_debug(type, buf, ANSI_COLOR_RED);
   free(buf);
 }
 
@@ -155,7 +160,7 @@ clib_package_warn(const char *type, const char *msg, ...) {
   va_start(args, msg);
   vsprintf(buf, msg, args);
   va_end(args);
-  clib_package_debug(type, buf, 33);
+  clib_package_debug(type, buf, ANSI_COLOR_YELLOW);
   free(buf);
 }
 
